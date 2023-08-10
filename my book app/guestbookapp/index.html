@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guestbook app</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+</body>
+<center>
+ <h1><marquee behavior="focus" direction"right">EMMABOOK APP </marquee></h1>
+</center><br>
+
+
+<center>
+    <input type="text" id="taskInput" placeholder="FULLNAME">
+    <ul id="taskList"></ul>
+    <button id = "myButton">SUBMIT</button>
+</center>   
+    <script>
+        // Get references to HTML elements
+        const taskInput = document.getElementById("taskInput");
+        const taskList = document.getElementById("taskList");
+        const myButton = document.getElementById('myButton');
+
+        //function to add a task
+         function addTask(taskText) {
+            const taskItem = document.createElement("li");
+            taskItem.classList.add("task");
+
+            const taskCheckbox = document.createElement("input");
+            taskCheckbox.type = "checkbox";
+            taskCheckbox.addEventListener("change", toggleTaskStatus);
+
+    
+            const taskTextElement = document.createElement("span");
+            taskTextElement.innerText = taskText;
+
+            const deleteButton = document.createElement("button");
+            deleteButton.innerText = "Delete";
+            deleteButton.addEventListener("click", removeTask);
+
+            taskItem.appendChild(taskCheckbox);
+            taskItem.appendChild(taskTextElement);
+            taskItem.appendChild(deleteButton);
+            taskList.appendChild(taskItem);
+            
+        }
+
+        //function to save tasks to local storage
+        function saveTasksToLocalStorage(){
+            const tasks = [];
+            const taskItems = document.querySelectorAll(".task");
+
+            taskItems.forEach((taskItem) => {
+                const taskText = taskItem.querySelector("span").innerText;
+                const isCompleted = taskItem.querySelector("input[type='checkbox']").checked;
+                tasks.push({text: taskText, completed: isCompleted});
+            })
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            }
+
+        // functions to load tasks from local storage
+        function loadTasksFromLocalStorage() {
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+            tasks.forEach((task) => {
+                addTask(task.text);
+                const taskItem = taskList.lastChild;
+                if (task.completed) {
+                    taskItem.querySelector("input[type='checkbox']").checked = true;                    
+                }
+            });
+        }
+
+        //function to toggle task status (completed or not)
+        function toggleTaskStatus(event) {
+            const taskItem = event.target.parentElement;
+            taskItem.classList.toggle("completed");
+            saveTasksToLocalStorage();
+        }
+
+        //function to edit a task
+        function makeTaskEditable(event){
+            const taskItem = event.target.parentElement;
+            taskItem.edit();
+            saveTasksToLocalStorage();
+        }
+        
+        //function to remove a task
+        function removeTask(event) {
+            const taskItem = event.target.parentElement;
+            taskItem.remove();
+            saveTasksToLocalStorage();
+        }
+
+        //Event listener for adding a new task
+        taskInput.addEventListener("keypress", function (event) {
+            if (event.key === "Enter" && taskInput.value.trim() !=="") {
+                addTask (taskInput.value.trim());
+                taskInput.value = "";
+                saveTasksToLocalStorage();
+            }
+            myButton.addEventListener('click', function 
+        (event) {
+            if (event.button === 0 && taskInput.value.trim() !=="") {
+                addTask (taskInput.value.trim());
+                taskInput.value = "";
+                saveTasksToLocalStorage();
+            }
+
+        })
+        });
+
+        function makeTaskEditable(taskItem) {
+            taskItem.classList.add("editing");
+
+        const taskTextElement = taskItem.querySelector("span");
+        const taskTextInput = document.createElement("input");
+        taskTextInput.type = "text";
+        taskTextInput.value = taskTextElement.innerText;
+        taskTextInput.addEventListener("blur", saveEditedTask);
+        taskTextInput.addEventListener("keypress", function (event) {
+            if (event.key === "Enter"){
+                saveEditedTask(event);
+            }
+            myButton.addEventListener('click', function 
+        (event) {
+            if (event.button === 0 ){
+                saveEditedTask(event);
+            }
+        });
+        });
+
+        taskItem.appendChild(taskTextInput);
+        taskTextInput.focus();
+        }
+
+        //function to save the edited task
+        function saveEditedTask(event) {
+            const taskItem = event.target.parentElement;
+            const taskTextElement = taskItem.querySelector("span");
+            const taskTextInput = taskItem.querySelector("input[type='text']");
+            const newTaskText = taskTextInput.value.trim();
+
+            if (newTaskText !== ""){
+                taskTextElement.innerText = newTaskText;
+                taskItem.classList.remove("editing");
+                saveTasksToLocalStorage();
+            }   else {
+                removeTask(event);
+            }
+        }
+
+        // Event Listener for clicking on a task to edit
+        taskList.addEventListener("click", function (event){
+            const target = event.target;
+            if (target.tagName === "SPAN") {
+                const taskItem = target.parentElement;
+                makeTaskEditable(taskItem);
+            }
+        });
+
+        // Event listerner for clicking on a file to edit
+        taskList.addEventListener("click", function (event){
+            const target = event.target;
+            if(target.tagName === "BUTTON" && Target.textContent === "edit"){
+                makeTaskEditable(taskItem);
+            }
+
+        })
+
+        // Load tasks from Local Storage on page load
+        loadTasksFromLocalStorage();    
+    </script>
+    
+</body>
+</html>
